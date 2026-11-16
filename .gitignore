@@ -1,0 +1,8 @@
+.DS_Store
+._*
+*.log
+opencore-*.txt
+*.bak
+*.bak2
+config.plist.pre-*
+config.plist.with-*

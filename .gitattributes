@@ -1,0 +1,3 @@
+# EFI 里全是二进制（kext / efi / icns），禁止任何换行符转换
+* -text
+-crlf
