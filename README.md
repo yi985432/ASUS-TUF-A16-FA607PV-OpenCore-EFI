@@ -15,7 +15,7 @@
 | CPU | AMD Ryzen 9 7940HX | ✅ 全部核心，电源管理正常 |
 | 独显 | NVIDIA RTX 4060 Laptop (8 GB) | ✅ Metal 加速（NullMoth 驱动） |
 | 核显 | Radeon 610M | ❌ 已禁用（macOS 无驱动） |
-| 声卡 | Realtek ALC256 | ⚠️ 能出声，但有破音/断流（见「已知问题」） |
+| 声卡 | Realtek ALC256 | ✅ 扬声器 + 麦克风均正常（采样率需设为 48 kHz） |
 | 网卡 | Intel AX210 (Wi-Fi 6E) | ✅ itlwm + HeliPort |
 | 有线网卡 | Realtek RTL8111 | ✅ |
 | 蓝牙 | Intel AX210 | ❓ 未验证 |
@@ -112,6 +112,8 @@ macOS 26 移除了 `AppleHDA.kext`（面向 Apple Silicon），所以用 [Simple
 - 播放 5–20 秒后突然静音，切歌或重开播放器才恢复
 
 原因：ALC256 在 layout 7 下的时钟是按 48 kHz 配置的，系统默认给 44.1 kHz，采样率不匹配导致重采样溢出 + DMA 缓冲下溢。
+
+> 实测：改成 48 kHz 后，扬声器破音和断流消失，内置麦克风也正常（输入输出都可用）。
 
 > 排查过但**无效**的方向（别浪费时间去试）：
 > - 换 layout-id（11 / 13 / 21 / 56 / 69 / 99）——SimpleHDA 只认内嵌的那一套配置，换任何值都会导致设备消失
