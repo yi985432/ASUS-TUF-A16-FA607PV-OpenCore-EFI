@@ -98,10 +98,25 @@ macOS 26 移除了 `AppleHDA.kext`（面向 Apple Silicon），所以用 [Simple
 
 | 问题 | 原因 | 状态 |
 |---|---|---|
-| **内置扬声器破音、播放几秒后静音** | SimpleHDA 的 layout 7 引脚/增益配置不完整，只认这一套 | 未解决，等上游更新 |
+| **内置扬声器破音、播放几秒后静音** | 采样率不匹配：系统默认 44.1 kHz，而 ALC256 layout 7 是按 48 kHz 调校的 | ✅ 已解决，改成 48 kHz 即可（见下） |
 | **亮度每次开机都是最大** | NullMoth 驱动会写 `nvram nullmoth-backlight` 但开机不读 | 可用开机脚本兜底（见下） |
 | 控制中心 Wi-Fi 磁贴显示"未连接" | AirportItlwm 的 `APPLE80211_IOC` 实现不完整 | 实际联网正常，仅显示问题 |
 | 睡眠/唤醒 | 未充分测试 | — |
+
+### 音频：必须把采样率改成 48 kHz
+
+装好系统后**第一件事**：打开「音频 MIDI 设置」→ 选中「内建输出」→ 把「格式」从 `44100 Hz` 改成 `48000 Hz`。
+
+不改成 48 kHz 的表现：
+- 音量一调就爆音
+- 播放 5–20 秒后突然静音，切歌或重开播放器才恢复
+
+原因：ALC256 在 layout 7 下的时钟是按 48 kHz 配置的，系统默认给 44.1 kHz，采样率不匹配导致重采样溢出 + DMA 缓冲下溢。
+
+> 排查过但**无效**的方向（别浪费时间去试）：
+> - 换 layout-id（11 / 13 / 21 / 56 / 69 / 99）——SimpleHDA 只认内嵌的那一套配置，换任何值都会导致设备消失
+> - 关闭 AppleALC——`layout-id` 会变成你设的值，但 SimpleHDA 初始化失败，设备直接没了
+> - 关闭 `nvrmacpibl` 改善音频——那个参数只管背光，跟音频无关
 
 ### 亮度兜底方案
 
@@ -145,6 +160,14 @@ macOS 26 移除了 `AppleHDA.kext`（面向 Apple Silicon），所以用 [Simple
 4. **装显卡驱动**
 
    参考 [NullMoth](https://github.com/nullmoth/nvidia-macos-driver) 的 README。装完后把 `config-installed.plist` 复制成 `config.plist`。
+
+5. **把音频采样率改成 48 kHz**（否则会破音、播几秒就哑）
+
+   「音频 MIDI 设置」→ 内建输出 → 格式 → `48000 Hz`。详见上面「音频」一节。
+
+6. **关掉自动登录**（如果有人给你装了 `finish-setup.sh` 之类的脚本）
+
+   那类脚本为了绕过设置向导，会把密码以可逆形式写进 `/etc/kcpassword`。装好后去「系统设置 → 用户与群组 → 自动登录」关掉，并改一次密码。
 
 ---
 
