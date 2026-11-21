@@ -89,6 +89,17 @@
 						AgAAAA==
 						</data>
 					</dict>
+					<key>PRT1</key>
+					<dict>
+						<key>#comment</key>
+						<string>Built-in Camera (WCAM)</string>
+						<key>port</key>
+						<data>
+						AQAAAA==
+						</data>
+						<key>UsbConnector</key>
+						<integer>255</integer>
+					</dict>
 				</dict>
 			</dict>
 		</dict>
