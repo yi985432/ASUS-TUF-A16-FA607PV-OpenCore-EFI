@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-22（第二批）
+
+### CPU 名称
+
+- `PlatformInfo → Generic → ProcessorType` 从 `3841`（0x0F01，Xeon W 类型）改为 `0`，核心数显示恢复为 16。
+- `boot-args` 的 `revpatch=sbvmm` 改为 `revpatch=sbvmm,cpuname`。boot-arg 优先级高于 NVRAM，之前把 NVRAM 里的 `sbvmm,cpuname` 覆盖掉了，导致 `revcpuname` 不生效。
+- 名称现为 `AMD Ryzen 9 7940HX 16-Core Processor`。
+
+### CPU 温度与频率
+
+- `AMDRyzenCPUPowerManagement.kext` 0.7.2 → **3.40.3**。
+- `SMCAMDProcessor.kext` 1.0.1（2020，SDK 12.3）→ **3.40.3**。旧版在 Tahoe 上 `!registered, !matched`，SMC 里没有任何传感器 key。
+- 来源：`DrogaBox/ryzenstatus-utils` v1.85.0（官方 0.7.2 的活跃 fork，支持 macOS 13–26）。
+- 配套 `RyzenStatus.app` 1.85.0，菜单栏显示每核频率、温度、PPT 功耗。
+- 实测睿频（`powermetrics --samplers cpu_power`，nominal 2.4 GHz）：轻载单核 4635–4985 MHz，12 线程满载 4372 MHz。
+
+### 有线网卡
+
+- `RealtekRTL8111.kext` 2.4.2 → **3.0.4（release v3.0.0）**。
+- 新特性：Tahoe 下的 AppleVTD 支持、无 fallback MAC 时生成随机 MAC、低内存下改进接收缓冲分配。
+
 ## 2026-11-22
 
 ### AirDrop / Wi-Fi

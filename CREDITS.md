@@ -34,7 +34,8 @@
 | USBToolBox / UTBMap | USB 端口映射 | https://github.com/USBToolBox/tool |
 | VoodooI2C / VoodooI2CHID | I2C 触摸板 | https://github.com/VoodooI2C/VoodooI2C |
 | VoodooPS2Controller | PS/2 键盘 / 触摸板 | https://github.com/acidanthera/VoodooPS2 |
-| RealtekRTL8111 | 有线网卡 | https://github.com/Mieze/RTL8111_driver_for_OS_X |
+| RealtekRTL8111 | 有线网卡 | https://github.com/Mieze/RTL8111_driver_for_OS_X （v3.0.0） |
+| RyzenStatus / ryzenstatus-utils | AMD CPU 温度、频率、功耗监控（提供 3.40.3 版 kext 与菜单栏 App） | https://github.com/DrogaBox/ryzenstatus-utils （GPL-3.0） |
 | IntelBluetoothFirmware | Intel 蓝牙固件 | https://github.com/OpenIntelWireless/IntelBluetoothFirmware |
 | BlueToolFixup | 蓝牙协议栈修正 | https://github.com/acidanthera/BrcmPatchRAM |
 | ECEnabler / SMCBatteryManager / SMCAMDProcessor / AMDRyzenCPUPowerManagement / NVMeFix / RestrictEvents / ForgedInvariant / AMFIPass / BrightnessKeys / HibernationFixup / AppleMCEReporterDisabler | 各自功能 | 见对应上游仓库 |

@@ -44,7 +44,10 @@
 2. **键盘背光**：新增 `AsusSMC.kext` + `SSDT-ASUS.aml`，Fn+F2/F3 和系统滑块都可调。
 3. **内置摄像头**：`UTBMap` 补上 `XHC0.RHUB.PRT1`（port 1），摄像头正常枚举。
 4. **屏幕亮度持久化**：修复 NullMoth `backlight.sh` 的解析 bug，并提供 `tools/fix-nullmoth-backlight.sh`。
-5. `config.plist` 和 `config-installed.plist` 均已同步；SMBIOS 占位符未改动。
+5. **CPU 名称**：`RestrictEvents` + `revcpu=1` + `revcpuname`，并修正 `revpatch` 被 boot-arg 覆盖导致的 `cpuname` 失效。
+6. **CPU 温度/频率**：`AMDRyzenCPUPowerManagement` / `SMCAMDProcessor` 从 0.7.2 / 1.0.1 升到 **3.40.3**，可在 RyzenStatus 中看每核频率与温度。
+7. **有线网卡**：`RealtekRTL8111` 从 2.4.2 升到 **3.0.4（v3.0.0）**，支持 Tahoe 下的 AppleVTD。
+8. `config.plist` 和 `config-installed.plist` 均已同步；SMBIOS 占位符未改动。
 
 ---
 
@@ -174,6 +177,54 @@ macOS 26 移除了 `AppleHDA.kext`（面向 Apple Silicon），所以用 [Simple
 - `MinKernel = 25.0.0`
 
 > 注意：**不能关闭 AppleALC**。关掉后 `layout-id` 虽然会变成你设的值，但 SimpleHDA 初始化失败，设备直接消失。
+
+### 8. CPU 名称（RestrictEvents）
+
+AMD Ryzen 在 macOS 上默认显示成 `Intel Xeon W`，因为「关于本机」的处理器名称来自 SMBIOS / Apple 的类型表，不读 CPUID 的真实型号。
+
+本机配置：
+
+| 项目 | 值 |
+|---|---|
+| `PlatformInfo → Generic → ProcessorType` | `0`（按实测核心数自动推导，16 核显示正确） |
+| `Kernel → Add` | `RestrictEvents.kext` 1.1.7 |
+| NVRAM `4D1FDA02-...:revcpu` | `1` |
+| NVRAM `4D1FDA02-...:revcpuname` | `AMD Ryzen 9 7940HX 16-Core Processor` |
+| `boot-args` | `revpatch=sbvmm,cpuname` |
+
+**关键坑**：`revpatch` 的 **boot-arg 优先级高于 NVRAM**。如果 boot-args 里只写 `revpatch=sbvmm`，NVRAM 里的 `sbvmm,cpuname` 会被覆盖，`cpuname` 补丁不生效，名称继续显示 Xeon W。
+
+### 9. CPU 温度与频率（RyzenStatus）
+
+原 EFI 里的 `SMCAMDProcessor` 是 2020 年 SDK 12.3 编译的 1.0.1，在 Tahoe 上加载后是 `!registered, !matched`，SMC 里没有任何传感器 key，等于没有功能。
+
+替换为 [ryzenstatus-utils](https://github.com/DrogaBox/ryzenstatus-utils) v1.85.0 提供的构建：
+
+- `AMDRyzenCPUPowerManagement.kext` **3.40.3**
+- `SMCAMDProcessor.kext` **3.40.3**
+- 配套 App：`RyzenStatus.app`（菜单栏，显示每核频率、温度、PPT 功耗、风扇曲线）
+
+验证睿频（无需装 App）：
+
+```bash
+sudo powermetrics -n 1 -i 1000 --samplers cpu_power | grep "System Average frequency"
+```
+
+`193.15% (4635.60 Mhz)`：百分比是相对 2.4 GHz 标称的倍率，超过 100% 即为睿频。本机实测：轻载单核 4635–4985 MHz，12 线程满载 4372 MHz。
+
+> `AMDCCDScheduler.kext`（dmg 内附带）未启用。它会 hook 内核调度，且只在 26.7.2/26.7.3 内核上验证过单台机器。
+
+### 10. 有线网卡（RealtekRTL8111 3.0.0）
+
+`RealtekRTL8111.kext` 从 2.4.2 升到 **3.0.4（release v3.0.0）**：
+
+- 支持 Tahoe 下的 AppleVTD
+- 无 fallback MAC 时生成随机 MAC
+- 低内存条件下改进接收缓冲分配
+
+```bash
+kmutil showloaded --list-only | grep RealtekRTL8111
+```
 
 ---
 
